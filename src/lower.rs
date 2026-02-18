@@ -90,7 +90,7 @@ impl LowerCtx {
         }
         Ok(())
     }
-    
+
     // @config
 
     fn lower_config(&mut self, config: &ConfigBlock) -> Result<()> {
@@ -596,14 +596,14 @@ impl LowerCtx {
             .collect();
 
         let op = match func {
-            //  Core ops 
+            //  Core ops
             "matmul" | "mm" => OpKind::MatMul,
             "add" => OpKind::Add,
             "sub" => OpKind::Sub,
             "mul" => OpKind::Mul,
             "div" => OpKind::Div,
 
-            //  Activations 
+            //  Activations
             "relu" => OpKind::Relu,
             "gelu" => OpKind::Gelu,
             "silu" | "swish" => OpKind::Silu,
@@ -613,16 +613,16 @@ impl LowerCtx {
             "log" => OpKind::Log,
             "sqrt" => OpKind::Sqrt,
 
-            //  Softmax 
+            //  Softmax
             "softmax" => {
                 let dim = self.get_named_int(&named, "dim").unwrap_or(-1);
                 OpKind::Softmax { dim }
             }
 
-            //  Embedding 
+            //  Embedding
             "embedding" | "Embedding" => OpKind::Embedding,
 
-            //  Linear 
+            //  Linear
             "linear" | "Linear" => {
                 let bias = named
                     .get("bias")
@@ -630,7 +630,7 @@ impl LowerCtx {
                 OpKind::Linear { bias }
             }
 
-            //  Normalization 
+            //  Normalization
             "layer_norm" | "LayerNorm" => {
                 let eps = self.get_named_float(&named, "eps").unwrap_or(1e-5);
                 OpKind::LayerNorm { eps }
@@ -640,7 +640,7 @@ impl LowerCtx {
                 OpKind::BatchNorm { eps }
             }
 
-            //  Attention 
+            //  Attention
             "multi_head_attention" | "MultiHeadAttention" => {
                 let n_heads = self.get_named_int(&named, "n_heads").unwrap_or(1);
                 OpKind::MultiHeadAttention { n_heads }
@@ -650,7 +650,7 @@ impl LowerCtx {
                 OpKind::TransformerBlock { n_heads }
             }
 
-            //  Reduction 
+            //  Reduction
             "sum" => {
                 let dim = self.get_named_int(&named, "dim").unwrap_or(-1);
                 let keepdim = self.get_named_bool(&named, "keepdim").unwrap_or(false);
@@ -668,27 +668,27 @@ impl LowerCtx {
                 }
             }
 
-            //  Shape ops 
+            //  Shape ops
             "transpose" => OpKind::Transpose,
             "concat" | "cat" => {
                 let dim = self.get_named_int(&named, "dim").unwrap_or(0);
                 OpKind::Concat { dim }
             }
 
-            //  Dropout 
+            //  Dropout
             "dropout" | "Dropout" => {
                 let p = self.get_named_float(&named, "p").unwrap_or(0.0);
                 OpKind::Dropout { p }
             }
 
-            //  Loss 
+            //  Loss
             "cross_entropy" | "cross_entropy_loss" => OpKind::CrossEntropy,
             "mse_loss" => OpKind::MseLoss,
 
-            //  Range 
+            //  Range
             "range" => OpKind::Range,
 
-            //  Fallback: custom/unknown op 
+            //  Fallback: custom/unknown op
             other => OpKind::Custom {
                 name: other.to_string(),
                 attrs: named

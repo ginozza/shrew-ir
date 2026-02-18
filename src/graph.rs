@@ -188,7 +188,7 @@ pub enum OpKind {
         keepdim: bool,
     },
 
-    //  Normalization 
+    //  Normalization
     LayerNorm {
         eps: f64,
     },
@@ -196,7 +196,7 @@ pub enum OpKind {
         eps: f64,
     },
 
-    //  Attention 
+    //  Attention
     MultiHeadAttention {
         n_heads: i64,
     },
@@ -207,7 +207,7 @@ pub enum OpKind {
         dim: i64,
     },
 
-    //  Shape ops 
+    //  Shape ops
     Reshape {
         target_shape: Vec<Dim>,
     },
@@ -228,21 +228,21 @@ pub enum OpKind {
         target_shape: Vec<Dim>,
     },
 
-    //  Dropout 
+    //  Dropout
     Dropout {
         p: f64,
     },
 
-    //  Linear 
+    //  Linear
     Linear {
         bias: bool,
     },
 
-    //  Loss functions 
+    //  Loss functions
     CrossEntropy,
     MseLoss,
 
-    //  Comparison 
+    //  Comparison
     Equal,
     NotEqual,
     Less,
@@ -250,32 +250,32 @@ pub enum OpKind {
     LessEqual,
     GreaterEqual,
 
-    //  Logical 
+    //  Logical
     And,
     Or,
     Not,
 
-    //  Constants 
+    //  Constants
     Constant(ConstantValue),
 
-    //  Control flow 
+    //  Control flow
     Repeat {
         count: i64,
         body_op: Box<OpKind>,
     },
 
-    //  Custom / user-defined 
+    //  Custom / user-defined
     Custom {
         name: String,
         attrs: HashMap<String, AttrValue>,
     },
 
-    //  Graph call (calling another @graph) 
+    //  Graph call (calling another @graph)
     Call {
         graph_name: String,
     },
 
-    //  Identity (pass-through, used for inputs) 
+    //  Identity (pass-through, used for inputs)
     Identity,
 }
 

@@ -61,7 +61,7 @@ impl Token {
 /// Every possible token kind in the .sw language.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
-    //  Directives (@-prefixed blocks) 
+    //  Directives (@-prefixed blocks)
     AtModel,          // @model
     AtConfig,         // @config
     AtTypes,          // @types
@@ -77,7 +77,7 @@ pub enum TokenKind {
     AtCheck,          // @check
     AtHint,           // @hint
 
-    //  Keywords 
+    //  Keywords
     Input,
     Output,
     Param,
@@ -124,7 +124,7 @@ pub enum TokenKind {
     InPlace,             // in_place
     NoGrad,              // no_grad
 
-    //  DType keywords 
+    //  DType keywords
     F16,
     F32,
     F64,
@@ -146,10 +146,10 @@ pub enum TokenKind {
     Gpu,
     Tpu,
 
-    //  Tensor keyword 
+    //  Tensor keyword
     Tensor,
 
-    //  Literals 
+    //  Literals
     IntLit(i64),
     FloatLit(f64),
     StringLit(String),

@@ -80,7 +80,7 @@ impl Parser {
         self.expect(TokenKind::Semi)?;
         Ok(ImportStmt { path, alias, span })
     }
-  
+
     // @model
 
     fn parse_metadata(&mut self) -> Result<MetadataBlock> {
@@ -124,8 +124,8 @@ impl Parser {
         self.expect(TokenKind::Semi)?;
         Ok(ExprField { key, value, span })
     }
-  
-    // @types 
+
+    // @types
 
     fn parse_types(&mut self) -> Result<TypesBlock> {
         let span = self.expect(TokenKind::AtTypes)?.span;
@@ -147,8 +147,8 @@ impl Parser {
         self.expect(TokenKind::Semi)?;
         Ok(TypeDef { name, ty, span })
     }
- 
-    // Type expressions 
+
+    // Type expressions
 
     fn parse_type_expr(&mut self) -> Result<TypeExpr> {
         let span = self.current_span();
@@ -774,7 +774,7 @@ impl Parser {
         self.expect(TokenKind::RBrace)?;
         Ok(MetricDef { name, attrs, span })
     }
- 
+
     // @logging
 
     fn parse_logging(&mut self) -> Result<LoggingBlock> {
@@ -787,7 +787,7 @@ impl Parser {
         self.expect(TokenKind::RBrace)?;
         Ok(LoggingBlock { fields, span })
     }
- 
+
     // @visualizations
 
     fn parse_visualization(&mut self) -> Result<VisualizationBlock> {
@@ -813,7 +813,7 @@ impl Parser {
         self.expect(TokenKind::RBrace)?;
         Ok(PlotDef { name, attrs, span })
     }
- 
+
     // Expressions (Pratt parser with precedence climbing)
 
     fn parse_expr(&mut self) -> Result<Expr> {
@@ -1154,9 +1154,7 @@ impl Parser {
         Ok(items)
     }
 
-    
     // Literals
-    
 
     fn parse_literal(&mut self) -> Result<Literal> {
         let span = self.current_span();

@@ -65,10 +65,10 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
         .collect();
 
     match &node.op {
-        //  Identity: propagate from single input 
+        //  Identity: propagate from single input
         OpKind::Identity => inputs.first().map(|t| (*t).clone()),
 
-        //  Unary element-wise: shape preserved 
+        //  Unary element-wise: shape preserved
         OpKind::Neg
         | OpKind::Relu
         | OpKind::Gelu
@@ -80,16 +80,16 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
         | OpKind::Sqrt
         | OpKind::Not => inputs.first().map(|t| (*t).clone()),
 
-        //  Softmax: shape preserved 
+        //  Softmax: shape preserved
         OpKind::Softmax { .. } => inputs.first().map(|t| (*t).clone()),
 
-        //  Dropout: shape preserved 
+        //  Dropout: shape preserved
         OpKind::Dropout { .. } => inputs.first().map(|t| (*t).clone()),
 
-        //  LayerNorm / BatchNorm: shape preserved 
+        //  LayerNorm / BatchNorm: shape preserved
         OpKind::LayerNorm { .. } | OpKind::BatchNorm { .. } => inputs.first().map(|t| (*t).clone()),
 
-        //  Binary element-wise: broadcast 
+        //  Binary element-wise: broadcast
         OpKind::Add | OpKind::Sub | OpKind::Mul | OpKind::Div | OpKind::Mod | OpKind::Pow => {
             if inputs.len() == 2 {
                 broadcast_shapes(inputs[0], inputs[1])
@@ -98,7 +98,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Comparison: same shape, bool dtype 
+        //  Comparison: same shape, bool dtype
         OpKind::Equal
         | OpKind::NotEqual
         | OpKind::Less
@@ -119,7 +119,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Logical: same shape, bool 
+        //  Logical: same shape, bool
         OpKind::And | OpKind::Or => {
             if inputs.len() == 2 {
                 if let Some(IrType::Tensor { shape, .. }) = broadcast_shapes(inputs[0], inputs[1]) {
@@ -135,7 +135,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  MatMul: [.., M, K] × [.., K, N] → [.., M, N] 
+        //  MatMul: [.., M, K] × [.., K, N] → [.., M, N]
         OpKind::MatMul => {
             if inputs.len() == 2 {
                 infer_matmul(inputs[0], inputs[1])
@@ -144,7 +144,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Transpose: swap last two dims 
+        //  Transpose: swap last two dims
         OpKind::Transpose => {
             if let Some(IrType::Tensor { shape, dtype }) = inputs.first() {
                 if shape.len() >= 2 {
@@ -166,7 +166,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Permute: reorder dimensions 
+        //  Permute: reorder dimensions
         OpKind::Permute { dims } => {
             if let Some(IrType::Tensor { shape, dtype }) = inputs.first() {
                 let new_shape: Vec<Dim> = dims
@@ -185,7 +185,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Reshape / View: target shape (resolve -1 if possible) 
+        //  Reshape / View: target shape (resolve -1 if possible)
         OpKind::Reshape { target_shape } | OpKind::View { target_shape } => {
             if let Some(IrType::Tensor { dtype, .. }) = inputs.first() {
                 Some(IrType::Tensor {
@@ -197,7 +197,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Expand: target shape 
+        //  Expand: target shape
         OpKind::Expand { target_shape } => {
             if let Some(IrType::Tensor { dtype, .. }) = inputs.first() {
                 Some(IrType::Tensor {
@@ -209,7 +209,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Reduction ops 
+        //  Reduction ops
         OpKind::Sum { dims, keepdim }
         | OpKind::Mean { dims, keepdim }
         | OpKind::Variance { dims, keepdim } => {
@@ -228,10 +228,10 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Concat: sum along dim 
+        //  Concat: sum along dim
         OpKind::Concat { dim } => infer_concat(&inputs, *dim),
 
-        //  Embedding: indices → [.., embed_dim] 
+        //  Embedding: indices → [.., embed_dim]
         OpKind::Embedding => {
             // If we have table and indices: table=[V, D], indices=[..] → [.., D]
             if inputs.len() >= 2 {
@@ -258,7 +258,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             None
         }
 
-        //  Linear 
+        //  Linear
         OpKind::Linear { .. } => {
             // input=[.., in_features], weight=[out, in] → [.., out_features]
             if inputs.len() >= 2 {
@@ -283,7 +283,7 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             None
         }
 
-        //  Loss functions: output is scalar 
+        //  Loss functions: output is scalar
         OpKind::CrossEntropy | OpKind::MseLoss => {
             if let Some(IrType::Tensor { dtype, .. }) = inputs.first() {
                 Some(IrType::Scalar(*dtype))
@@ -292,21 +292,21 @@ fn infer_node_type(graph: &IrGraph, id: NodeId) -> Option<IrType> {
             }
         }
 
-        //  Attention / Transformer: shape preserved (simplified) 
+        //  Attention / Transformer: shape preserved (simplified)
         OpKind::MultiHeadAttention { .. } | OpKind::TransformerBlock { .. } => {
             inputs.first().map(|t| (*t).clone())
         }
 
-        //  Repeat: shape preserved 
+        //  Repeat: shape preserved
         OpKind::Repeat { .. } => inputs.first().map(|t| (*t).clone()),
 
-        //  Constants: already typed at creation 
+        //  Constants: already typed at creation
         OpKind::Constant(_) => None,
 
-        //  Custom / Call: can't infer 
+        //  Custom / Call: can't infer
         OpKind::Custom { .. } | OpKind::Call { .. } => None,
 
-        //  Split / Range: complex, skip 
+        //  Split / Range: complex, skip
         OpKind::Split { .. } | OpKind::Range => None,
     }
 }

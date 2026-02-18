@@ -69,7 +69,7 @@ impl<'src> Lexer<'src> {
         let start_col = self.col;
         let ch = self.bytes[self.pos] as char;
 
-        //  Directive (@keyword) 
+        //  Directive (@keyword)
         if ch == '@' {
             self.advance();
             let ident_start = self.pos;
@@ -107,22 +107,22 @@ impl<'src> Lexer<'src> {
             ));
         }
 
-        //  String literal 
+        //  String literal
         if ch == '"' {
             return self.lex_string(start_pos, start_line, start_col);
         }
 
-        //  Number literal 
+        //  Number literal
         if ch.is_ascii_digit() {
             return self.lex_number(start_pos, start_line, start_col);
         }
 
-        //  Identifier or keyword 
+        //  Identifier or keyword
         if ch.is_ascii_alphabetic() || ch == '_' {
             return self.lex_ident(start_pos, start_line, start_col);
         }
 
-        //  Multi-char operators & punctuation 
+        //  Multi-char operators & punctuation
         let kind = match ch {
             '{' => {
                 self.advance();
@@ -290,7 +290,7 @@ impl<'src> Lexer<'src> {
         ))
     }
 
-    // Helpers 
+    // Helpers
 
     fn advance(&mut self) {
         if self.pos < self.bytes.len() {
