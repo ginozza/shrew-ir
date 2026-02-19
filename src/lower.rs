@@ -626,7 +626,7 @@ impl LowerCtx {
             "linear" | "Linear" => {
                 let bias = named
                     .get("bias")
-                    .is_none_or(|e| matches!(e, Expr::Bool(true, _)));
+                    .map_or(true, |e| matches!(e, Expr::Bool(true, _)));
                 OpKind::Linear { bias }
             }
 
