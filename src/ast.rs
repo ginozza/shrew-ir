@@ -311,6 +311,7 @@ pub enum InferenceField {
     Optimizations(Vec<Expr>, Span),
     Quantization(Vec<ExprField>, Span),
     Generation(Vec<ExprField>, Span),
+    Dataset(Vec<ExprField>, Span),
     Generic(ExprField),
 }
 

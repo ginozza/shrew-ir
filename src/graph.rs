@@ -699,4 +699,5 @@ pub struct InferenceConfig {
     pub model_graph: String,
     pub quantization: Option<HashMap<String, ConfigValue>>,
     pub generation: Option<HashMap<String, ConfigValue>>,
+    pub dataset: Option<DatasetConfig>,
 }

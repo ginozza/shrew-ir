@@ -760,6 +760,26 @@ impl Parser {
                 let fields = self.parse_brace_fields()?;
                 Ok(InferenceField::Generation(fields, span))
             }
+            TokenKind::Ident(ref s) if s == "dataset" || s == "data" || s == "input" => {
+                let name = s.clone();
+                self.advance();
+                self.expect(TokenKind::Colon)?;
+                if self.check(&TokenKind::LBrace) {
+                    let fields = self.parse_brace_fields()?;
+                    if self.check(&TokenKind::Semi) {
+                        self.advance();
+                    }
+                    Ok(InferenceField::Dataset(fields, span))
+                } else {
+                    let val = self.parse_expr()?;
+                    self.expect(TokenKind::Semi)?;
+                    Ok(InferenceField::Generic(ExprField {
+                        key: name,
+                        value: val,
+                        span,
+                    }))
+                }
+            }
             _ => {
                 let f = self.parse_expr_field()?;
                 Ok(InferenceField::Generic(f))

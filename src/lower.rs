@@ -987,10 +987,14 @@ impl LowerCtx {
         let mut model_graph = String::new();
         let mut quantization = None;
         let mut generation = None;
+        let mut dataset = None;
 
         for field in &inference.fields {
             match field {
                 InferenceField::Model(name, _) => model_graph = name.clone(),
+                InferenceField::Dataset(fields, _) => {
+                    dataset = Some(self.lower_dataset_config(fields)?);
+                }
                 InferenceField::Quantization(fields, _) => {
                     let mut map = HashMap::new();
                     for f in fields {
@@ -1009,6 +1013,21 @@ impl LowerCtx {
                     }
                     generation = Some(map);
                 }
+                InferenceField::Generic(f) => match f.key.as_str() {
+                    "dataset" | "data" | "input" => {
+                        if let Ok(ConfigValue::Str(s)) = self.eval_config_expr(&f.value) {
+                            let format = if s == "xor" { "xor".to_string() } else { "csv".to_string() };
+                            dataset = Some(DatasetConfig {
+                                path: s,
+                                format,
+                                has_header: true,
+                                feature_cols: Vec::new(),
+                                target_cols: Vec::new(),
+                            });
+                        }
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }
@@ -1017,6 +1036,7 @@ impl LowerCtx {
             model_graph,
             quantization,
             generation,
+            dataset,
         })
     }
 }
