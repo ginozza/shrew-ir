@@ -293,6 +293,7 @@ pub enum TrainingField {
     Optimizer(Vec<ExprField>, Span),
     LrSchedule(Vec<ExprField>, Span),
     GradClip(Vec<ExprField>, Span),
+    Dataset(Vec<ExprField>, Span),
     Generic(ExprField),
 }
 

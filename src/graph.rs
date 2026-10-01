@@ -661,6 +661,17 @@ pub struct TrainingConfig {
     pub epochs: i64,
     pub batch_size: i64,
     pub accumulation_steps: i64,
+    pub dataset: Option<DatasetConfig>,
+}
+
+/// Dataset configuration specified in @training block.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DatasetConfig {
+    pub path: String,
+    pub format: String,
+    pub has_header: bool,
+    pub feature_cols: Vec<usize>,
+    pub target_cols: Vec<usize>,
 }
 
 #[derive(Debug, Clone)]

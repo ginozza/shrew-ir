@@ -772,6 +772,7 @@ impl LowerCtx {
         let mut epochs: i64 = 1;
         let mut batch_size: i64 = 1;
         let mut accumulation_steps: i64 = 1;
+        let mut dataset = None;
 
         for field in &training.fields {
             match field {
@@ -785,6 +786,9 @@ impl LowerCtx {
                 }
                 TrainingField::GradClip(fields, _) => {
                     grad_clip = Some(self.lower_grad_clip_config(fields)?);
+                }
+                TrainingField::Dataset(fields, _) => {
+                    dataset = Some(self.lower_dataset_config(fields)?);
                 }
                 TrainingField::Generic(f) => match f.key.as_str() {
                     "precision" => {
@@ -807,6 +811,18 @@ impl LowerCtx {
                             accumulation_steps = n;
                         }
                     }
+                    "dataset" | "data" => {
+                        if let Ok(ConfigValue::Str(s)) = self.eval_config_expr(&f.value) {
+                            let format = if s == "xor" { "xor".to_string() } else { "csv".to_string() };
+                            dataset = Some(DatasetConfig {
+                                path: s,
+                                format,
+                                has_header: true,
+                                feature_cols: Vec::new(),
+                                target_cols: Vec::new(),
+                            });
+                        }
+                    }
                     _ => {}
                 },
             }
@@ -822,6 +838,70 @@ impl LowerCtx {
             epochs,
             batch_size,
             accumulation_steps,
+            dataset,
+        })
+    }
+
+    fn lower_dataset_config(&self, fields: &[ExprField]) -> Result<DatasetConfig> {
+        let mut path = String::new();
+        let mut format = "csv".to_string();
+        let mut has_header = true;
+        let mut feature_cols = Vec::new();
+        let mut target_cols = Vec::new();
+
+        for f in fields {
+            match f.key.as_str() {
+                "path" | "source" | "file" => {
+                    if let Ok(ConfigValue::Str(s)) = self.eval_config_expr(&f.value) {
+                        path = s;
+                    }
+                }
+                "format" | "type" => {
+                    if let Ok(ConfigValue::Str(s)) = self.eval_config_expr(&f.value) {
+                        format = s;
+                    }
+                }
+                "has_header" | "header" => {
+                    if let Ok(ConfigValue::Bool(b)) = self.eval_config_expr(&f.value) {
+                        has_header = b;
+                    }
+                }
+                "features" | "feature_cols" => {
+                    if let Ok(ConfigValue::List(list)) = self.eval_config_expr(&f.value) {
+                        feature_cols = list
+                            .iter()
+                            .filter_map(|cv| match cv {
+                                ConfigValue::Int(n) => Some(*n as usize),
+                                _ => None,
+                            })
+                            .collect();
+                    }
+                }
+                "targets" | "target_cols" | "labels" => {
+                    if let Ok(ConfigValue::List(list)) = self.eval_config_expr(&f.value) {
+                        target_cols = list
+                            .iter()
+                            .filter_map(|cv| match cv {
+                                ConfigValue::Int(n) => Some(*n as usize),
+                                _ => None,
+                            })
+                            .collect();
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        if path == "xor" {
+            format = "xor".to_string();
+        }
+
+        Ok(DatasetConfig {
+            path,
+            format,
+            has_header,
+            feature_cols,
+            target_cols,
         })
     }
 

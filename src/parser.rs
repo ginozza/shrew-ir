@@ -692,6 +692,25 @@ impl Parser {
                 let fields = self.parse_brace_fields()?;
                 Ok(TrainingField::GradClip(fields, span))
             }
+            TokenKind::Ident(ref s) if s == "dataset" || s == "data" => {
+                self.advance();
+                self.expect(TokenKind::Colon)?;
+                if self.check(&TokenKind::LBrace) {
+                    let fields = self.parse_brace_fields()?;
+                    if self.check(&TokenKind::Semi) {
+                        self.advance();
+                    }
+                    Ok(TrainingField::Dataset(fields, span))
+                } else {
+                    let val = self.parse_expr()?;
+                    self.expect(TokenKind::Semi)?;
+                    Ok(TrainingField::Generic(ExprField {
+                        key: "dataset".to_string(),
+                        value: val,
+                        span,
+                    }))
+                }
+            }
             _ => {
                 let f = self.parse_expr_field()?;
                 Ok(TrainingField::Generic(f))
